@@ -11,7 +11,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UserService.Config;
 using UserService.Database;
+using UserService.MessageQueue;
 
 namespace UserService
 {
@@ -29,6 +31,8 @@ namespace UserService
         {
             string mySqlConnectionStr = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContextPool<UserDbContext>(options => options.UseMySql(mySqlConnectionStr, ServerVersion.AutoDetect(mySqlConnectionStr)));
+            services.Configure<RabbitMQConfig>(Configuration.GetSection("RabbitMQ"));
+            services.AddScoped<RabbitMQHandler>();
             services.AddControllers();
         }
 

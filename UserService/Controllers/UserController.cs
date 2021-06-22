@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -14,16 +15,16 @@ namespace UserService.Controllers
     [Route("[controller]")]
     public class UserController : ControllerBase
     {
-        UserDbContext _context;
-        RabbitMQHandler mQHandler;
+        private readonly UserDbContext _context;
+        private readonly RabbitMQHandler _mqHandler;
 
-        public UserController(UserDbContext context)
+        public UserController(UserDbContext context, RabbitMQHandler mQHandler)
         {
             _context = context;
-            //mQHandler = new RabbitMQHandler("user");
+            _mqHandler = mQHandler;
         }
 
-        [HttpGet("{id:length(24)}", Name = "GetUser")]
+        [HttpGet("{id:length(24)}", Name = "GetUser"), Authorize]
         public ActionResult<User> Get(string id)
         {
             try
@@ -37,10 +38,8 @@ namespace UserService.Controllers
             }
         }
 
-        //TODO: Validate FromBody with logic classes too
-        //TODO: Make the SendMessage asynchronuous
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] User user)
+        public ActionResult Create([FromBody] User user)
         {
             _context.Users.Add(user);
             _context.SaveChanges();
@@ -48,8 +47,7 @@ namespace UserService.Controllers
             try
             {
                 User newUser = _context.Users.Find(user.Id);
-                newUser.CreatedAt = DateTime.Now;
-                mQHandler.SendMessage(newUser);
+                _mqHandler.SendMessage(newUser);
                 return Created($"Users/{newUser.Id}", newUser);
             }
             catch (Exception)
@@ -58,9 +56,8 @@ namespace UserService.Controllers
             }
         }
 
-        // TO DO
-        [HttpPut]
-        public async Task<IActionResult> Update([FromBody] User user)
+        [HttpPut, Authorize]
+        public ActionResult Update([FromBody] User user)
         {
 
             try
@@ -69,7 +66,7 @@ namespace UserService.Controllers
                 newUser.UpdatedAt = DateTime.Now;
                 // Update post here
 
-                mQHandler.SendMessage(newUser);
+                _mqHandler.SendMessage(newUser);
 
                 // 
                 return Created($"Users/{newUser.Id}", newUser);
@@ -81,7 +78,7 @@ namespace UserService.Controllers
         }
 
 
-        [HttpDelete("{id:length(24)}", Name = "DeleteUser")]
+        [HttpDelete("{id:length(24)}", Name = "DeleteUser"), Authorize]
         public ActionResult<User> Delete(string id)
         {
             try

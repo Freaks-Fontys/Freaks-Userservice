@@ -11,9 +11,10 @@ namespace UserService.Models
         public String UserName { get; set; }
         public String Email { get; set; }
         public Car Car { get; set; }
-        public Tag[] Preferences { get; set; }
+        //public Tag[] Preferences { get; set; }
         public String AvatarURL { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public DateTime RegisteredAt { get; set; }
+        public DateTime LatestLoginAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public DateTime DeletedAt { get; set; }
 
@@ -22,14 +23,15 @@ namespace UserService.Models
 
         }
 
-        public User(Guid id, string userName, Car car, Tag[] preferences, string avatarURL, DateTime createdAt, DateTime updatedAt, DateTime deletedAt)
+        public User(Guid id, string userName, Car car, string avatarURL, DateTime registeredAt, DateTime latestLoginAt, DateTime updatedAt, DateTime deletedAt)
         {
             Id = id;
             UserName = userName;
             Car = car;
-            Preferences = preferences;
+            //Preferences = preferences;
             AvatarURL = avatarURL;
-            CreatedAt = createdAt;
+            RegisteredAt = registeredAt;
+            LatestLoginAt = latestLoginAt;
             UpdatedAt = updatedAt;
             DeletedAt = deletedAt;
         }

@@ -1,10 +1,12 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UserService.Config;
 
 namespace UserService.MessageQueue
 {
@@ -13,12 +15,12 @@ namespace UserService.MessageQueue
         IConnectionFactory factory;
         IConnection connection;
         IModel channel;
-        string _queueName;
+        RabbitMQConfig config;
 
 
-        public RabbitMQHandler(string queueName)
+        public RabbitMQHandler(IOptions<RabbitMQConfig> options)
         {
-            _queueName = queueName;
+            config = options.Value;
             SetupMQ();
         }
 
@@ -26,14 +28,13 @@ namespace UserService.MessageQueue
         {
             factory = new ConnectionFactory
             {
-                // Username and password are hardcoded
-                Uri = new Uri("amqp://guest:freaks@localhost:5672")
+                Uri = new Uri(config.URI)
             };
 
             connection = factory.CreateConnection();
             channel = connection.CreateModel();
 
-            channel.QueueDeclare(_queueName,
+            channel.QueueDeclare(config.QueueName,
                 durable: true,
                 exclusive: false,
                 autoDelete: false,
@@ -44,7 +45,7 @@ namespace UserService.MessageQueue
         {
             var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
 
-            channel.BasicPublish("", _queueName, null, body);
+            channel.BasicPublish("", config.QueueName, null, body);
         }
     }
 }
