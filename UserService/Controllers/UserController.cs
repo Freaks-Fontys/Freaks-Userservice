@@ -17,10 +17,12 @@ namespace UserService.Controllers
     {
         private readonly UserDbContext _context;
         private readonly RabbitMQHandler _mqHandler;
+        private readonly ILogger _logger;
 
-        public UserController(UserDbContext context, RabbitMQHandler mQHandler)
+        public UserController(UserDbContext context, ILogger<UserController> logger, RabbitMQHandler mQHandler)
         {
             _context = context;
+            _logger = logger;
             _mqHandler = mQHandler;
         }
 
@@ -41,6 +43,7 @@ namespace UserService.Controllers
         [HttpPost]
         public ActionResult Create([FromBody] User user)
         {
+            _logger.LogDebug("User will be created");
             _context.Users.Add(user);
             _context.SaveChanges();
 

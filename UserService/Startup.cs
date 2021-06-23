@@ -34,6 +34,7 @@ namespace UserService
             services.AddDbContextPool<UserDbContext>(options => options.UseMySql(mySqlConnectionStr, ServerVersion.AutoDetect(mySqlConnectionStr)));
             services.Configure<RabbitMQConfig>(Configuration.GetSection("RabbitMQ"));
             services.AddScoped<RabbitMQHandler>();
+            services.AddLogging();
             services.AddControllers();
         }
 
