@@ -29,7 +29,8 @@ namespace UserService
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            string mySqlConnectionStr = Configuration.GetConnectionString("DefaultConnection");
+            var env = Configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT");
+            string mySqlConnectionStr = env.ToLower() == "development" ? Configuration.GetConnectionString("Local") : Configuration.GetConnectionString("Production");
             services.AddDbContextPool<UserDbContext>(options => options.UseMySql(mySqlConnectionStr, ServerVersion.AutoDetect(mySqlConnectionStr)));
             services.Configure<RabbitMQConfig>(Configuration.GetSection("RabbitMQ"));
             services.AddScoped<RabbitMQHandler>();

@@ -11,8 +11,8 @@ using UserService.Models;
 
 namespace UserService.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("[controller]")]
     public class UserController : ControllerBase
     {
         private readonly UserDbContext _context;
